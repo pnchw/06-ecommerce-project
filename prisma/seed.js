@@ -76,7 +76,6 @@ async function main() {
     ],
   });
 
-  console.log("Database seeded successfully! 🌱");
 }
 
 main()

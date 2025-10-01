@@ -78,12 +78,6 @@ export default function PaymentMethod({ searchParams }) {
 			setLoading(false);
 		}
 	}
-
-	console.log(
-		"This is method details from page:",
-		JSON.stringify(selectedPaymentMethod)
-	);
-
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-8">
 			<div className="flex justify-center items-start pt-20 px-4 pb-10">

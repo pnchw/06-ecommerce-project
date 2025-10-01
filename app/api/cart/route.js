@@ -194,7 +194,6 @@ export async function POST(req) {
       });
     }
   } catch (error) {
-    console.log("[CART POST]", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

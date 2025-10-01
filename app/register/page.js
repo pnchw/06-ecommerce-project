@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import TextInput from "@/components/TextInput";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function SignUpPage() {
 	const router = useRouter();
@@ -15,8 +16,6 @@ export default function SignUpPage() {
 	const [error, setError] = useState(null);
 	const [emailLoading, setEmailLoading] = useState(false);
 	const [googleLoading, setGoogleLoading] = useState(false);
-	const [showPassword, setShowPassword] = useState(false);
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 	const handleChange = (e) => {
 		setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -87,121 +86,35 @@ export default function SignUpPage() {
 					)}
 
 					<form onSubmit={handleEmailSignUp} className="space-y-5" noValidate>
-						<div>
-							<label
-								htmlFor="name"
-								className="block text-gray-700 font-medium mb-1"
-							>
-								Name
-							</label>
-							<input
-								id="name"
-								type="text"
-								name="name"
-								placeholder="Enter your name"
-								value={credentials.name}
-								onChange={handleChange}
-								required
-								className="w-full rounded-xl border border-gray-300 p-3 text-gray-900 
-                  						focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 
-                  						outline-none bg-gray-50 hover:bg-white transition"
-								autoComplete="name"
-								aria-required="true"
-							/>
-						</div>
+						<TextInput
+							label="Name"
+							id="name"
+							type="text"
+							name="name"
+							placeholder="Enter your name"
+							value={credentials.name}
+							onChange={handleChange}
+							autoComplete="name"
+						/>
 
-						<div>
-							<label
-								htmlFor="email"
-								className="block text-gray-700 font-medium mb-1"
-							>
-								Email
-							</label>
-							<input
-								id="email"
-								type="email"
-								name="email"
-								placeholder="Enter your email"
-								value={credentials.email}
-								onChange={handleChange}
-								required
-								className="w-full rounded-xl border border-gray-300 p-3 text-gray-900 
-                  						focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 
-                 						 outline-none bg-gray-50 hover:bg-white transition"
-								autoComplete="email"
-								aria-required="true"
-							/>
-						</div>
+						<TextInput
+							label="Email"
+							id="email"
+							type="email"
+							name="email"
+							placeholder="Enter your email"
+							value={credentials.email}
+							onChange={handleChange}
+							autoComplete="email"
+						/>
 
-						<div className="relative">
-							<label
-								htmlFor="password"
-								className="block text-gray-700 font-medium mb-1"
-							>
-								Password
-							</label>
-							<input
-								id="password"
-								type={showPassword ? "text" : "password"}
-								name="password"
-								placeholder="Enter your password"
-								value={credentials.password}
-								onChange={handleChange}
-								required
-								className="w-full rounded-xl border border-gray-300 p-3 text-gray-900 
-                  						focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 
-                  						outline-none bg-gray-50 hover:bg-white transition"
-								autoComplete="new-password"
-								aria-required="true"
-								minLength={6}
-							/>
-							<button
-								type="button"
-								onClick={() => setShowPassword(!showPassword)}
-								className="absolute right-3 top-10 text-gray-500 hover:text-gray-700 cursor-pointer"
-							>
-								{showPassword ? (
-									<EyeOffIcon size={20} />
-								) : (
-									<EyeIcon size={20} />
-								)}
-							</button>
-						</div>
-
-						<div className="relative">
-							<label
-								htmlFor="confirmPassword"
-								className="block text-gray-700 font-medium mb-1"
-							>
-								Confirm Password
-							</label>
-							<input
-								id="confirmPassword"
-								type={showConfirmPassword ? "text" : "password"}
-								name="confirmPassword"
-								placeholder="Confirm your password"
-								value={credentials.confirmPassword}
-								onChange={handleChange}
-								required
-								className="w-full rounded-xl border border-gray-300 p-3 text-gray-900 
-                  						focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 
-                  						outline-none bg-gray-50 hover:bg-white transition"
-								autoComplete="new-password"
-								aria-required="true"
-								minLength={6}
-							/>
-							<button
-								type="button"
-								onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-								className="absolute right-3 top-10 text-gray-500 hover:text-gray-700 cursor-pointer"
-							>
-								{showConfirmPassword ? (
-									<EyeOffIcon size={20} />
-								) : (
-									<EyeIcon size={20} />
-								)}
-							</button>
-						</div>
+						<PasswordInput
+							value={credentials.password}
+							confirmPassword={credentials.confirmPassword}
+							onChange={handleChange}
+							autoComplete="new-password"
+							confirm={true}
+						/>
 
 						<button
 							type="submit"
