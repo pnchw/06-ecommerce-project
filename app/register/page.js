@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 export default function SignUpPage() {
 	const router = useRouter();
@@ -14,6 +15,8 @@ export default function SignUpPage() {
 	const [error, setError] = useState(null);
 	const [emailLoading, setEmailLoading] = useState(false);
 	const [googleLoading, setGoogleLoading] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 	const handleChange = (e) => {
 		setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -130,7 +133,7 @@ export default function SignUpPage() {
 							/>
 						</div>
 
-						<div>
+						<div className="relative">
 							<label
 								htmlFor="password"
 								className="block text-gray-700 font-medium mb-1"
@@ -139,7 +142,7 @@ export default function SignUpPage() {
 							</label>
 							<input
 								id="password"
-								type="password"
+								type={showPassword ? "text" : "password"}
 								name="password"
 								placeholder="Enter your password"
 								value={credentials.password}
@@ -152,9 +155,20 @@ export default function SignUpPage() {
 								aria-required="true"
 								minLength={6}
 							/>
+							<button
+								type="button"
+								onClick={() => setShowPassword(!showPassword)}
+								className="absolute right-3 top-10 text-gray-500 hover:text-gray-700 cursor-pointer"
+							>
+								{showPassword ? (
+									<EyeOffIcon size={20} />
+								) : (
+									<EyeIcon size={20} />
+								)}
+							</button>
 						</div>
 
-						<div>
+						<div className="relative">
 							<label
 								htmlFor="confirmPassword"
 								className="block text-gray-700 font-medium mb-1"
@@ -163,7 +177,7 @@ export default function SignUpPage() {
 							</label>
 							<input
 								id="confirmPassword"
-								type="password"
+								type={showConfirmPassword ? "text" : "password"}
 								name="confirmPassword"
 								placeholder="Confirm your password"
 								value={credentials.confirmPassword}
@@ -176,13 +190,28 @@ export default function SignUpPage() {
 								aria-required="true"
 								minLength={6}
 							/>
+							<button
+								type="button"
+								onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+								className="absolute right-3 top-10 text-gray-500 hover:text-gray-700 cursor-pointer"
+							>
+								{showConfirmPassword ? (
+									<EyeOffIcon size={20} />
+								) : (
+									<EyeIcon size={20} />
+								)}
+							</button>
 						</div>
 
 						<button
 							type="submit"
 							disabled={emailLoading || googleLoading}
 							className={`w-full rounded-xl mt-3 py-3 font-semibold text-white bg-gradient-to-r from-indigo-600 to-blue-500 shadow-lg hover:from-blue-500 hover:to-indigo-600 active:scale-95 active:brightness-90 transition-all duration-200
-              							${emailLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}`}
+              							${
+															emailLoading
+																? "opacity-70 cursor-not-allowed"
+																: "cursor-pointer"
+														}`}
 						>
 							{emailLoading ? "Signing up..." : "Sign Up"}
 						</button>
