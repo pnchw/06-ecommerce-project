@@ -30,7 +30,7 @@ model User {
 
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @updatedAt
-  Order      Order[]
+  Order     Order[]
 }
 
 model Account {
