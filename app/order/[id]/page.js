@@ -17,7 +17,7 @@ export default function OrderDetailsPage() {
 
     async function fetchOrderDetails() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/order?id=${params.id}`);
+        const res = await fetch(`/api/order?id=${params.id}`);
         if (!res.ok) {
           if (res.status === 404) {
             notFound();
