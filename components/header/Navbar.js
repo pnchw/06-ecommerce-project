@@ -111,7 +111,7 @@ export default function Navbar() {
 								priority
 							/>
 							<span className="text-white font-bold text-lg tracking-wide select-none">
-								My E-Anime Shop
+								E-Anime Shop
 							</span>
 						</Link>
 					)}
@@ -261,16 +261,18 @@ export default function Navbar() {
 							</DropdownMenu>
 						) : (
 							<>
-								<Link href="/register">
-									<button className="bg-gradient-to-tr from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500 text-white font-bold px-4 py-2 rounded-full shadow-md transition-all cursor-pointer">
-										Register
-									</button>
-								</Link>
-								<Link href="/login">
-									<button className="bg-white hover:bg-gray-100 text-blue-600 font-bold px-4 py-2 rounded-full border border-gray-200 shadow-sm transition-all cursor-pointer">
-										Login
-									</button>
-								</Link>
+								<div className="flex flex-col md:flex-row md:gap-2 items-center w-full max-w-[300px]">
+									<Link href="/register">
+										<button className="w-full bg-gradient-to-tr from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500 text-white font-bold px-3 py-1 md:px-4 md:py-2 rounded-full shadow-md transition-all cursor-pointer text-sm md:text-base">
+											Register
+										</button>
+									</Link>
+									<Link href="/login">
+										<button className="w-full bg-white hover:bg-gray-100 text-blue-600 font-bold px-3 py-1 md:px-4 md:py-2 rounded-full border border-gray-200 shadow-sm transition-all cursor-pointer text-sm md:text-base">
+											Login
+										</button>
+									</Link>
+								</div>
 							</>
 						)}
 					</div>

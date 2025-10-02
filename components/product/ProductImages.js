@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function ProductImages({ images, name }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -41,7 +42,7 @@ export default function ProductImages({ images, name }) {
           onClick={prevImage}
           className="absolute left-2 top-1/2 -translate-y-1/2 bg-white shadow-md backdrop-blur-sm p-3 rounded-full hover:bg-amber-500 hover:text-white active:scale-90 active:brightness-90 transition w-12 h-12 cursor-pointer flex items-center justify-center"
         >
-          ◀
+          <ChevronLeft />
         </button>
 
         {/* Next Button */}
@@ -49,7 +50,7 @@ export default function ProductImages({ images, name }) {
           onClick={nextImage}
           className="absolute right-2 top-1/2 -translate-y-1/2 bg-white shadow-md backdrop-blur-sm p-3 rounded-full hover:bg-amber-500 hover:text-white active:scale-90 active:brightness-90 transition w-12 h-12 cursor-pointer flex items-center justify-center"
         >
-          ▶
+          <ChevronRight />
         </button>
       </div>
 

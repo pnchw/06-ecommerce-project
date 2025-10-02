@@ -4,7 +4,7 @@ import Banner from "@/components/Banner";
 
 export default function Homepage() {
   return (
-    <div className="mt-5 p-20">
+    <div className="mt-15 px-2 sm:px-4 md:px-8 lg:px-20 py-4 sm:py-6 lg:py-10">
       <Container>
         <div>
           <Banner />
