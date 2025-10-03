@@ -13,13 +13,13 @@ export default function PasswordInput({
 	confirmName = "confirmPassword",
 	confirmValue,
 	autoComplete,
+	error,
 }) {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 	return (
 		<>
-			{/* Password */}
 			<div className="relative">
 				<label
 					htmlFor="password"
@@ -35,9 +35,14 @@ export default function PasswordInput({
 					value={value}
 					onChange={onChange}
 					required
-					className="w-full rounded-xl border border-gray-300 p-3 text-gray-900 
-                  						focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 
-                  						outline-none bg-gray-50 hover:bg-white transition"
+					className={`w-full rounded-xl border p-3 text-gray-900 
+						outline-none bg-gray-50 hover:bg-white transition
+						focus:ring-1 focus:ring-indigo-500
+						${
+							error
+								? "border-red-500 focus:border-red-500"
+								: "border-gray-300 focus:border-indigo-500"
+						}`}
 					autoComplete={autoComplete}
 					aria-required="true"
 					minLength={6}
@@ -67,9 +72,14 @@ export default function PasswordInput({
 						value={confirmValue}
 						onChange={onChange}
 						required
-						className="w-full rounded-xl border border-gray-300 p-3 text-gray-900 
-                  						focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 
-                  						outline-none bg-gray-50 hover:bg-white transition"
+						className={`w-full rounded-xl border p-3 text-gray-900 
+						outline-none bg-gray-50 hover:bg-white transition
+						focus:ring-1 focus:ring-indigo-500
+						${
+							error
+								? "border-red-500 focus:border-red-500"
+								: "border-gray-300 focus:border-indigo-500"
+						}`}
 						autoComplete={autoComplete}
 						aria-required="true"
 						minLength={6}

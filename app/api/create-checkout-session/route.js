@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { PrismaClient } from "@prisma/client";
 import Stripe from "stripe";
-import { Item } from "@radix-ui/react-radio-group";
 
-const prisma = new PrismaClient();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {

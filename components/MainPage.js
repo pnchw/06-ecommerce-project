@@ -45,7 +45,7 @@ export default async function MainPage() {
 				{products.map((product, idx) => (
 					<Card
 						key={idx}
-						className="hover:shadow-xl hover:scale-105 transition-shadow duration-300 rounded-xl cursor-pointer relative w-full max-w-xs"
+						className="hover:shadow-xl hover:scale-105 transition-transform duration-300 ease-out rounded-xl cursor-pointer relative w-full max-w-xs"
 					>
 						<Link href={`/product/${product.id}`} className="block">
 							<CardHeader className="p-0 overflow-hidden">

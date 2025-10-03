@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Loader } from "lucide-react";
 import AddressForm from "@/components/address/AddressForm";
 
 export default function AddressPage() {
@@ -16,6 +17,7 @@ export default function AddressPage() {
 		country: "",
 	});
 	const [loading, setLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 	const [isPending, startTransition] = useTransition();
 	const router = useRouter();
 
@@ -31,6 +33,7 @@ export default function AddressPage() {
 					`/login?callbackUrl=${encodeURIComponent(callbackToCurrentPath)}`
 				);
 			}
+			setIsLoading(false);
 		};
 
 		checkAuthAndCart();
@@ -83,6 +86,15 @@ export default function AddressPage() {
 			setLoading(false);
 		}
 	};
+
+	if (isLoading) {
+		return (
+			<div className="flex justify-center items-center h-screen">
+				<Loader className="w-10 h-10 animate-spin text-blue-600" />
+			</div>
+		);
+	}
+
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-8">
 			<AddressForm

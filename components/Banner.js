@@ -17,12 +17,9 @@ export default function Banner() {
 					<p className="text-lg md:text-xl text-white/90 mb-6">
 						Enjoy discounts on your favorite characters
 					</p>
-					<a
-						href="#shop"
-						className="px-6 py-3 bg-amber-400 hover:bg-amber-300 text-black font-bold rounded-full shadow-lg transition-transform transform hover:scale-105"
-					>
+					<button className="px-6 py-3 bg-amber-400 text-black font-bold rounded-full shadow-lg transform transition duration-150 hover:scale-105 active:scale-95 active:brightness-90 cursor-pointer">
 						Shop Now
-					</a>
+					</button>
 				</div>
 
 				{/* Image Section */}

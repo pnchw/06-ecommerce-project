@@ -164,7 +164,7 @@ export default function Navbar() {
 												}}
 												className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-800"
 											>
-												<X className="w-5 h-5" />
+												<X className="w-5 h-5 cursor-pointer" />
 											</button>
 										</div>
 									</form>

@@ -9,8 +9,19 @@ export async function POST(req) {
     const { name, email, password, confirmPassword } = await req.json();
 
     // Validate input
-    if (!name || !email || !password || password !== confirmPassword) {
-      return NextResponse.json({ error: "Invalid input data" }, { status: 400 });
+    if (!name || !email || !password || !confirmPassword) {
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+    }
+
+    // Check password match
+    if (password !== confirmPassword) {
+      return NextResponse.json({ error: "Passwords do not match" }, { status: 400 });
     }
 
     // Check if user already exists

@@ -7,7 +7,9 @@ export default function TextInput({
 	placeholder,
 	value,
 	onChange,
-    autoComplete,
+	autoComplete,
+	onBlur,
+	error,
 }) {
 	return (
 		<div>
@@ -22,11 +24,14 @@ export default function TextInput({
 				type={type}
 				value={value}
 				onChange={onChange}
+				onBlur={onBlur}
 				placeholder={placeholder}
 				required
-				className="w-full rounded-xl border border-gray-300 p-3 text-gray-900 
-                  						focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 
-                  						outline-none bg-gray-50 hover:bg-white transition"
+				className={`w-full rounded-xl border p-3 text-gray-900 outline-none border-gray-300 bg-gray-50 hover:bg-white transition ${
+					error
+						? "border-red-500 focus:border-red-500"
+						: "focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+				}`}
 				autoComplete={autoComplete}
 				aria-required="true"
 			/>

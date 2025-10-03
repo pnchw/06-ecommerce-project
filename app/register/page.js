@@ -16,6 +16,7 @@ export default function SignUpPage() {
 	const [error, setError] = useState(null);
 	const [emailLoading, setEmailLoading] = useState(false);
 	const [googleLoading, setGoogleLoading] = useState(false);
+	const [emailError, setEmailError] = useState("");
 
 	const handleChange = (e) => {
 		setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -26,6 +27,15 @@ export default function SignUpPage() {
 		setEmailLoading(true);
 		setError(null);
 
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(credentials.email)) {
+			setEmailError("Invalid email address");
+			setEmailLoading(false);
+			return;
+		} else {
+			setEmailError("");
+		}
+
 		try {
 			const res = await fetch("/api/register", {
 				method: "POST",
@@ -34,8 +44,14 @@ export default function SignUpPage() {
 			});
 
 			const data = await res.json();
+
 			if (!res.ok) {
-				throw new Error(data.error || "Registration failed");
+				if (data.error && data.error.includes("User already exists")) {
+					setEmailError("Email already exists");
+				} else {
+					throw new Error(data.error || "Registration failed");
+				}
+				return;
 			}
 
 			// After successful sign-up, automatically sign in the user
@@ -49,11 +65,20 @@ export default function SignUpPage() {
 				throw new Error(loginRes.error);
 			}
 
-			router.push("/"); // Redirect to home after login
+			router.push("/");
 		} catch (error) {
-			setError("Registration failed, please try again");
+			setError(error.message);
 		} finally {
 			setEmailLoading(false);
+		}
+	};
+
+	const handleEmailBlur = () => {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(credentials.email)) {
+			setEmailError("Invalid email address");
+		} else {
+			setEmailError("");
 		}
 	};
 
@@ -96,24 +121,33 @@ export default function SignUpPage() {
 							onChange={handleChange}
 							autoComplete="name"
 						/>
-
-						<TextInput
-							label="Email"
-							id="email"
-							type="email"
-							name="email"
-							placeholder="Enter your email"
-							value={credentials.email}
-							onChange={handleChange}
-							autoComplete="email"
-						/>
+						<div className="relative">
+							<TextInput
+								label="Email"
+								id="email"
+								type="email"
+								name="email"
+								placeholder="Enter your email"
+								value={credentials.email}
+								onChange={handleChange}
+								onBlur={handleEmailBlur}
+								autoComplete="email"
+								error={emailError}
+							/>
+							{emailError && (
+								<p className="absolute text-red-600 text-sm left-2">
+									{emailError}
+								</p>
+							)}
+						</div>
 
 						<PasswordInput
 							value={credentials.password}
-							confirmPassword={credentials.confirmPassword}
+							confirmValue={credentials.confirmPassword}
 							onChange={handleChange}
 							autoComplete="new-password"
 							confirm={true}
+							error={error}
 						/>
 
 						<button

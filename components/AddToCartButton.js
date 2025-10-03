@@ -59,8 +59,9 @@ export default function AddToCartButton({ product }) {
 		<>
 			<button
 				onClick={handleAddToCart}
-				className={`absolute bottom-4 right-4 p-2 rounded-full shadow-md cursor-pointer text-white transition-colors duration-150
-       						 ${clicked ? "bg-amber-700" : "bg-amber-600 hover:bg-amber-500"}`}
+				onMouseDown={(e) => e.stopPropagation()}
+				className={`absolute bottom-4 right-4 p-2 rounded-full shadow-md cursor-pointer text-white transition-transform duration-200 ease-out
+       						 ${clicked ? "scale-90 bg-amber-700" : "bg-amber-600 hover:bg-amber-500 hover:scale-110"}`}
 				aria-label="Add to cart"
 			>
 				<ShoppingCart size={18} />
