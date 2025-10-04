@@ -21,7 +21,7 @@ export async function GET() {
         : { sessionCartId: sessionCartId },
     });
 
-    if (!cart || !cart.items || cart.items.length === 0) {
+    if (!cart || !cart?.items || cart?.items?.length === 0) {
       return NextResponse.json({ cart: [] });
     }
 
@@ -40,7 +40,7 @@ export async function GET() {
           price: product.price,
           image: product.images,
           quantity: item.quantity,
-          stock: product.stock,
+          stock: product.stock ?? 0,
         };
       })
     );

@@ -13,6 +13,7 @@ export default function LoginForm() {
 	const [error, setError] = useState(null);
 	const [emailLoading, setEmailLoading] = useState(false);
 	const [googleLoading, setGoogleLoading] = useState(false);
+	const [emailError, setEmailError] = useState("");
 
 	const handleChange = (e) => {
 		setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -42,6 +43,15 @@ export default function LoginForm() {
 			router.push(callbackUrl);
 		} else {
 			setError(data.error || "Login failed, please try again");
+		}
+	};
+
+	const handleEmailBlur = () => {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(credentials.email)) {
+			setEmailError("Invalid email address");
+		} else {
+			setEmailError("");
 		}
 	};
 
@@ -75,17 +85,25 @@ export default function LoginForm() {
 
 					{/* Email/Password Login */}
 					<form onSubmit={handleEmailLogin} className="space-y-5" noValidate>
-						<TextInput
-							label="Email"
-							id="email"
-							type="email"
-							name="email"
-							value={credentials.email}
-							onChange={handleChange}
-							placeholder="Enter your email"
-							autoComplete="email"
-						/>
-
+						<div className="relative">
+							<TextInput
+								label="Email"
+								id="email"
+								type="email"
+								name="email"
+								value={credentials.email}
+								onChange={handleChange}
+								onBlur={handleEmailBlur}
+								placeholder="Enter your email"
+								autoComplete="email"
+								error={emailError}
+							/>
+							{emailError && (
+								<p className="absolute text-red-600 text-sm left-2">
+									{emailError}
+								</p>
+							)}
+						</div>
 						<PasswordInput
 							name="password"
 							value={credentials.password}
@@ -97,14 +115,13 @@ export default function LoginForm() {
 							type="submit"
 							disabled={emailLoading || googleLoading}
 							className={`w-full rounded-xl mt-3 py-3 font-semibold text-white
-              bg-gradient-to-r from-indigo-600 to-blue-500 shadow-lg
-              hover:from-blue-500 hover:to-indigo-600
-              active:scale-95 active:brightness-90 transition-all duration-200
-              ${
-								emailLoading
-									? "opacity-70 cursor-not-allowed"
-									: "cursor-pointer"
-							}`}
+              							bg-gradient-to-r from-indigo-600 to-blue-500 shadow-lg hover:from-blue-500 hover:to-indigo-600
+              							active:scale-95 active:brightness-90 transition-all duration-200
+              							${
+															emailLoading
+																? "opacity-70 cursor-not-allowed"
+																: "cursor-pointer"
+														}`}
 						>
 							{emailLoading ? "Logging in..." : "Log In"}
 						</button>
@@ -119,12 +136,13 @@ export default function LoginForm() {
 					<button
 						onClick={handleGoogleLogin}
 						disabled={googleLoading || emailLoading}
-						className={`w-full rounded-xl py-3 font-semibold text-white
-            bg-red-600 shadow-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500
-            active:scale-95 active:brightness-90 transition-all duration-200
-            ${
-							googleLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer"
-						}`}
+						className={`w-full rounded-xl py-3 font-semibold text-white bg-red-600 shadow-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500
+            						active:scale-95 active:brightness-90 transition-all duration-200
+           							 ${
+														googleLoading
+															? "opacity-70 cursor-not-allowed"
+															: "cursor-pointer"
+													}`}
 						aria-label="Log in with Google"
 					>
 						{googleLoading ? "Logging in..." : "Continue with Google"}

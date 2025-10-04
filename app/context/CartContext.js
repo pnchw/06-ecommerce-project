@@ -8,19 +8,25 @@ export function CartProvider({ children }) {
 	const [cart, setCart] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 
-	// Fetch cart from DB when component mounts
 	useEffect(() => {
 		async function fetchCart() {
 			try {
 				const res = await fetch("/api/cart");
 				const data = await res.json();
-				if (res.ok) {
-					setCart(data.cart);
+
+				if (res.ok && data.cart) {
+					setCart(
+						data.cart.map((item) => ({
+							...item,
+							stock: item.stock ?? 0,
+						}))
+					);
 				} else {
-					console.log("Failed to fetch cart:", data.error);
+					setCart([]);
 				}
-			} catch (error) {
-				console.error("Error fetching cart:", error);
+			} catch (err) {
+				console.error("Error fetching cart:", err);
+				setCart([]);
 			} finally {
 				setIsLoading(false);
 			}
@@ -30,7 +36,6 @@ export function CartProvider({ children }) {
 
 	async function addToCart(product) {
 		try {
-			// 1. Update context state
 			setCart((prevCart) => {
 				const exists = prevCart.find((item) => item.id === product.id);
 				if (exists) {
@@ -67,15 +72,17 @@ export function CartProvider({ children }) {
 
 	async function removeFromCart(productId) {
 		try {
-			setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
-
-			await fetch("/api/cart", {
+			const res = await fetch("/api/cart", {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ productId, quantity: 0 }),
 			});
+			if (!res.ok) throw new Error("Failed to remove item");
+
+			setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
 		} catch (err) {
-			console.error("Error removing from cart:", err);
+			console.error(err);
+			throw err;
 		}
 	}
 

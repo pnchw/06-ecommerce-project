@@ -71,7 +71,6 @@ export default function Navbar() {
 	const handleSearch = (e) => {
 		e.preventDefault();
 		if (!query.trim()) return;
-		router.push(`/search?query=${encodeURIComponent(query)}`);
 		setShowDropdown(false);
 		if (isMobile) setIsSearchOpen(false);
 	};

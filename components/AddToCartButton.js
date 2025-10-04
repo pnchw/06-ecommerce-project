@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
-import { ShoppingCart } from "lucide-react";
+import { Loader, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -10,10 +10,13 @@ export default function AddToCartButton({ product }) {
 	const { addToCart } = useCart();
 	const router = useRouter();
 	const [clicked, setClicked] = useState(false);
+	const [loading, setLoading] = useState(false);
 
 	const handleAddToCart = async (e) => {
 		e.preventDefault();
 		e.stopPropagation();
+		if (loading) return;
+		setLoading(true);
 
 		if (!product) return;
 
@@ -52,6 +55,8 @@ export default function AddToCartButton({ product }) {
 			});
 		} catch (error) {
 			console.log("Error adding to cart:", error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -59,12 +64,16 @@ export default function AddToCartButton({ product }) {
 		<>
 			<button
 				onClick={handleAddToCart}
-				onMouseDown={(e) => e.stopPropagation()}
 				className={`absolute bottom-4 right-4 p-2 rounded-full shadow-md cursor-pointer text-white transition-transform duration-200 ease-out
-       						 ${clicked ? "scale-90 bg-amber-700" : "bg-amber-600 hover:bg-amber-500 hover:scale-110"}`}
+       						 ${
+											clicked
+												? "scale-90 bg-amber-700"
+												: "bg-amber-600 hover:bg-amber-500 hover:scale-110"
+										}`}
 				aria-label="Add to cart"
+				disabled={loading}
 			>
-				<ShoppingCart size={18} />
+				{loading ? <Loader className="animate-spin" size={18} /> : <ShoppingCart size={18} />}
 			</button>
 		</>
 	);
