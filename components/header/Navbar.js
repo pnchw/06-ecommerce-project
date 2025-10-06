@@ -129,6 +129,11 @@ export default function Navbar() {
 										placeholder="Search..."
 										value={query}
 										onChange={(e) => setQuery(e.target.value)}
+										onFocus={() => {
+											if (query.trim().length > 0 && results.length > 0) {
+												setShowDropdown(true);
+											}
+										}}
 										className="flex-1 bg-transparent outline-none px-2 text-gray-700 placeholder-gray-400"
 									/>
 									<button type="submit">
@@ -152,6 +157,11 @@ export default function Navbar() {
 												placeholder="Search..."
 												value={query}
 												onChange={(e) => setQuery(e.target.value)}
+												onFocus={() => {
+													if (query.trim().length > 0 && results.length > 0) {
+														setShowDropdown(true);
+													}
+												}}
 												className="w-full bg-white rounded-full px-4 py-2 outline-none pr-10"
 												autoFocus
 											/>

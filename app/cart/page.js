@@ -8,7 +8,8 @@ import CartItemsTable from "@/components/cart/CartItemsTable";
 import CartSummaryCard from "@/components/cart/CartSummaryCard";
 
 export default function CartPage() {
-	const { cart, isLoading, clearCart } = useCart();
+	const { cart, isLoading, clearCart, updateItemQuantity, removeFromCart } =
+		useCart();
 	const router = useRouter();
 
 	if (isLoading) {
@@ -30,7 +31,11 @@ export default function CartPage() {
 			</h1>
 
 			<div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-				<CartItemsTable />
+				<CartItemsTable
+					cart={cart}
+					updateItemQuantity={updateItemQuantity}
+					removeFromCart={removeFromCart}
+				/>
 				<CartSummaryCard cart={cart} router={router} clearCart={clearCart} />
 			</div>
 		</div>

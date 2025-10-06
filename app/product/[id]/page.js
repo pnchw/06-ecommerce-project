@@ -20,10 +20,9 @@ export default function ProductDetailPage() {
 		if (!params.id) return;
 		async function fetchProduct() {
 			try {
-				const res = await fetch(
-					`/api/products/${params.id}`,
-					{ cache: "no-store" }
-				);
+				const res = await fetch(`/api/products/${params.id}`, {
+					cache: "no-store",
+				});
 				if (!res.ok) throw new Error("Failed to fetch product");
 				const data = await res.json();
 				setProduct(data);
@@ -40,18 +39,7 @@ export default function ProductDetailPage() {
 		if (!product) return;
 
 		try {
-			const res = await fetch("/api/cart", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					productId: product.id,
-					quantity,
-				}),
-			});
-			const data = await res.json();
-			if (!res.ok) throw new Error(data.error);
-
-			addToCart({
+			await addToCart({
 				id: product.id,
 				name: product.name,
 				price: product.price,

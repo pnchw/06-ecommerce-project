@@ -43,6 +43,7 @@ export default function PaymentActions({
 	const [isWaiting, startTransition] = useTransition();
 
 	const handleStripePayment = async (orderId) => {
+		setLoading(true);
 		try {
 			const res = await fetch("/api/stripe/create-checkout-session", {
 				method: "POST",
@@ -68,6 +69,8 @@ export default function PaymentActions({
 		} catch (err) {
 			console.error(err);
 			toast.error("Stripe payment error: " + err.message);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -186,12 +189,16 @@ export default function PaymentActions({
 				</PayPalScriptProvider>
 
 				{!isPaid && paymentMethod === "Stripe" && (
-					<button
+					<Button
 						onClick={() => handleStripePayment(orderId)}
-						className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 cursor-pointer"
+						className="w-full gap-2 px-6 py-3 font-semibold text-white 
+               						shadow-md bg-gradient-to-r from-blue-500 to-indigo-500 hover:scale-105
+              						active:scale-95 active:brightness-90 transition-all duration-200 cursor-pointer"
+						disabled={loading}
 					>
+						{loading && <Loader className="w-5 h-5 animate-spin text-white" />}
 						Pay with Stripe
-					</button>
+					</Button>
 				)}
 
 				{!isPaid && paymentMethod === "Cash" && (

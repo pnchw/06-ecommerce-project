@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { useCart } from "@/app/context/CartContext";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Table,
@@ -16,78 +15,89 @@ import {
 import { toast } from "sonner";
 import { Loader } from "lucide-react";
 
-export default function CartItemsTable() {
+export default function CartItemsTable({
+	cart,
+	updateItemQuantity,
+	removeFromCart,
+}) {
 	const [loadingItems, setLoadingItems] = useState({});
-	const { cart: contextCart, updateItemQuantity, removeFromCart } = useCart();
-	const [cart, setCart] = useState([]);
+	const [removingItems, setRemovingItems] = useState({});
+	const [tempQty, setTempQty] = useState({});
+	const debouncedRefs = useRef({});
+
+	const setLoading = (id, state) => {
+		setLoadingItems((prev) => ({ ...prev, [id]: state }));
+	};
+
+	// create/get per-item debounced updater
+	const getDebouncedUpdater = (id, previousQty) => {
+		if (!debouncedRefs.current[id]) {
+			debouncedRefs.current[id] = {
+				timer: null,
+				fn: (qty) => {
+					if (debouncedRefs.current[id].timer) {
+						clearTimeout(debouncedRefs.current[id].timer);
+					}
+					debouncedRefs.current[id].timer = setTimeout(async () => {
+						setLoading(id, true);
+						try {
+							await updateItemQuantity(id, qty);
+							setTempQty((prev) => {
+								const copy = { ...prev };
+								delete copy[id];
+								return copy;
+							});
+						} catch (err) {
+							console.error("Failed to update quantity", err);
+							toast.error("Failed to update quantity");
+							setTempQty((prev) => ({ ...prev, [id]: previousQty }));
+						} finally {
+							setLoading(id, false);
+							debouncedRefs.current[id].timer = null;
+						}
+					}, 500);
+				},
+			};
+		}
+		return debouncedRefs.current[id].fn;
+	};
 
 	useEffect(() => {
-		async function fetchStock() {
-			try {
-				const res = await fetch("/api/cart");
-				const data = await res.json();
-				if (res.ok && data.cart) {
-					const mergedCart = contextCart.map((item) => {
-						const backendItem = data.cart.find((b) => b.id === item.id);
-						return backendItem ? { ...item, stock: backendItem.stock } : item;
-					});
-					setCart(mergedCart);
-				}
-			} catch (err) {
-				console.error(err);
-			}
-		}
-		fetchStock();
-	}, [contextCart]);
+		return () => {
+			Object.values(debouncedRefs.current).forEach((entry) => {
+				if (entry?.timer) clearTimeout(entry.timer);
+			});
+		};
+	}, []);
 
-	const setLoading = (id, type, state) => {
-		setLoadingItems((prev) => ({
-			...prev,
-			[id]: { ...prev[id], [type]: state },
-		}));
-	};
-
-	const increaseQty = async (id, currentQty, stock) => {
-		if (currentQty >= stock) {
-			toast.error("Not enough stock available");
+	const changeQty = (id, currentQty, delta, stock) => {
+		const newQty = currentQty + delta;
+		if (newQty < 1) return;
+		if (newQty > stock) {
 			return;
 		}
-
-		setLoading(id, "increase", true);
-		try {
-			await updateItemQuantity(id, currentQty + 1);
-		} catch (err) {
-			console.error(err);
-			toast.error("Failed to increase quantity");
-		} finally {
-			setLoading(id, "increase", false);
-		}
-	};
-
-	const decreaseQty = async (id, currentQty) => {
-		if (currentQty <= 1) return;
-
-		setLoading(id, "decrease", true);
-		try {
-			await updateItemQuantity(id, currentQty - 1);
-		} catch (err) {
-			console.error(err);
-			toast.error("Failed to decrease quantity");
-		} finally {
-			setLoading(id, "decrease", false);
-		}
+		setTempQty((prev) => ({ ...prev, [id]: newQty }));
+		const debouncedUpdate = getDebouncedUpdater(id, currentQty);
+		debouncedUpdate(newQty);
 	};
 
 	const handleRemove = async (itemId, itemName) => {
-		setLoading(itemId, "remove", true);
+		if (removingItems[itemId]) return;
+		setRemovingItems((prev) => ({ ...prev, [itemId]: true }));
+
 		try {
 			await removeFromCart(itemId);
 			toast.success(`${itemName} removed from cart`);
+			setTempQty((prev) => {
+				const copy = { ...prev };
+				delete copy[itemId];
+				return copy;
+			});
 		} catch (err) {
 			console.error(err);
 			toast.error(`Failed to remove ${itemName}`);
 		} finally {
-			setLoading(itemId, "remove", false);
+			setRemovingItems((prev) => ({ ...prev, [itemId]: false }));
 		}
 	};
 
@@ -103,113 +113,98 @@ export default function CartItemsTable() {
 						<TableHead className="text-center">Action</TableHead>
 					</TableRow>
 				</TableHeader>
+
 				<TableBody>
-					{cart.map((item) => (
-						<TableRow key={item.id} className="hover:bg-gray-50 transition">
-							<TableCell className="flex items-center space-x-4 min-w-[150px] max-w-[200px]">
-								<Link
-									href={`/product/${item.id}`}
-									className="flex items-center group w-full"
-									tabIndex={-1}
-								>
-									{item.image && item.image.length > 0 && (
-										<Image
-											src={item.image[0]}
-											alt={item.name}
-											width={60}
-											height={60}
-											className="rounded-md object-cover group-hover:scale-105 transition-transform flex-shrink-0"
-										/>
-									)}
-									<span className="ml-3 font-medium text-gray-800 truncate">
-										{item.name}
-									</span>
-								</Link>
-							</TableCell>
+					{cart.map((item) => {
+						const currentQty = tempQty[item.id] ?? item.quantity;
+						const isQtyLoading = !!loadingItems[item.id];
+						const isRemoving = !!removingItems[item.id];
 
-							<TableCell className="text-center text-gray-700 font-semibold">
-								฿{item.price}
-							</TableCell>
-
-							<TableCell className="text-center space-x-2 min-w-[160px]">
-								<div className="flex justify-center items-center gap-2">
-									<Button
-										type="button"
-										variant="outline"
-										size="sm"
-										onClick={() => decreaseQty(item.id, item.quantity)}
-										disabled={
-											item.quantity === 1 || loadingItems[item.id]?.decrease
-										}
-										className="w-9 h-9 flex items-center justify-center rounded-lg font-bold text-lg bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:bg-gray-100 disabled:text-gray-400
-                 									active:scale-95 active:brightness-90 transition-all duration-150 cursor-pointer"
-										aria-label={`Decrease quantity of ${item.name}`}
+						return (
+							<TableRow key={item.id} className="hover:bg-gray-50 transition">
+								<TableCell className="flex items-center space-x-4 min-w-[150px] max-w-[230px]">
+									<Link
+										href={`/product/${item.id}`}
+										className="flex items-center group w-full"
+										tabIndex={-1}
 									>
-										{loadingItems[item.id]?.decrease ? (
-											<Loader className="w-4 h-4 animate-spin" />
-										) : (
-											"-"
+										{item.image?.[0] && (
+											<Image
+												src={item.image[0]}
+												alt={item.name}
+												width={60}
+												height={60}
+												className="rounded-md object-cover group-hover:scale-105 transition-transform flex-shrink-0"
+											/>
 										)}
-									</Button>
-									<span className="inline-block w-8 text-center font-semibold text-lg">
-										{item.quantity}
-									</span>
-									<Button
-										type="button"
-										variant="outline"
-										size="sm"
-										onClick={() =>
-											increaseQty(item.id, item.quantity, item.stock)
-										}
-										disabled={
-											item.stock === 0 ||
-											item.quantity >= item.stock ||
-											loadingItems[item.id]?.increase
-										}
-										className="w-9 h-9 flex items-center justify-center rounded-lg font-bold text-lg bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:bg-gray-100 disabled:text-gray-400
-                 									active:scale-95 active:brightness-90 transition-all duration-150 cursor-pointer"
-										aria-label={`Increase quantity of ${item.name}`}
-									>
-										{loadingItems[item.id]?.increase ? (
-											<Loader className="w-4 h-4 animate-spin" />
-										) : (
-											"+"
-										)}
-									</Button>
-								</div>
-							</TableCell>
-
-							<TableCell className="text-center font-bold text-gray-900 min-w-[100px] w-[100px]">
-								<span className="inline-block w-full text-center">
-									฿{(item.price * item.quantity).toFixed(2)}{" "}
-								</span>
-							</TableCell>
-
-							<TableCell className="text-center">
-								<Button
-									className={`px-3 py-1.5 rounded-lg transition w-19 active:scale-95 active:brightness-90
-       										 ${
-															loadingItems
-																? "bg-red-500 hover:bg-red-600 active:scale-95 active:brightness-90 cursor-pointer"
-																: "bg-red-700 cursor-not-allowed scale-90"
-														}`}
-									type="button"
-									variant="destructive"
-									onClick={() => handleRemove(item.id, item.name)}
-									disabled={loadingItems[item.id]?.remove}
-									aria-label={`Remove ${item.name} from cart`}
-								>
-									{loadingItems[item.id]?.remove ? (
-										<span className="flex items-center justify-center gap-2">
-											<Loader size={18} className="animate-spin" />
+										<span className="ml-3 font-medium text-gray-800 truncate">
+											{item.name}
 										</span>
-									) : (
-										"Remove"
-									)}
-								</Button>
-							</TableCell>
-						</TableRow>
-					))}
+									</Link>
+								</TableCell>
+
+								<TableCell className="text-center text-gray-700 font-semibold">
+									฿{item.price}
+								</TableCell>
+
+								<TableCell className="text-center space-x-2 min-w-[160px]">
+									<div className="flex justify-center items-center gap-2">
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											onClick={() =>
+												changeQty(item.id, currentQty, -1, item.stock)
+											}
+											disabled={currentQty === 1 || isQtyLoading}
+											className="w-9 h-9 flex items-center justify-center rounded-lg font-bold text-lg bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:bg-gray-100 disabled:text-gray-400 active:scale-95 transition-all duration-150 cursor-pointer"
+										>
+											-
+										</Button>
+
+										<span className="inline-block w-8 text-center font-semibold text-lg">
+											{currentQty}
+										</span>
+
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											onClick={() =>
+												changeQty(item.id, currentQty, +1, item.stock)
+											}
+											disabled={currentQty >= item.stock || isQtyLoading}
+											className="w-9 h-9 flex items-center justify-center rounded-lg font-bold text-lg bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:bg-gray-100 disabled:text-gray-400 active:scale-95 transition-all duration-150 cursor-pointer"
+										>
+											+
+										</Button>
+									</div>
+								</TableCell>
+
+								<TableCell className="text-center font-bold text-gray-900 min-w-[100px]">
+									฿{(item.price * currentQty).toFixed(2)}
+								</TableCell>
+
+								<TableCell className="text-center">
+									<Button
+										className={`px-3 py-1.5 w-19 rounded-lg transition active:scale-95 ${
+											isRemoving
+												? "bg-red-700 cursor-not-allowed"
+												: "bg-red-500 hover:bg-red-600 cursor-pointer"
+										}`}
+										onClick={() => handleRemove(item.id, item.name)}
+										disabled={isRemoving}
+									>
+										{isRemoving ? (
+											<Loader className="w-5 h-5 animate-spin" />
+										) : (
+											"Remove"
+										)}
+									</Button>
+								</TableCell>
+							</TableRow>
+						);
+					})}
 				</TableBody>
 			</Table>
 		</div>
